@@ -26,7 +26,8 @@ public class User  {
   @Column(name="password", nullable = false, length = 50)
   private String password;
 
-  public User() {
+  public User(){
+    
   }
 
   public User(String name, String lastname, String rut, String email, String password) {

@@ -23,6 +23,10 @@ public class Product {
   @Column(name="price", nullable = false, length = 50, unique = true)
   private int price;
 
+  public Product(){
+    
+  }
+
   public Product(String name, String description, int stock, int price) {
     this.name = name;
     this.description = description;

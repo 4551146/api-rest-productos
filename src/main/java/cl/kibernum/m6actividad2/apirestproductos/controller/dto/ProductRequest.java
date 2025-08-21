@@ -1,6 +1,5 @@
 package cl.kibernum.m6actividad2.apirestproductos.controller.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 

@@ -3,17 +3,13 @@ package cl.kibernum.m6actividad2.apirestproductos.controller;
 import java.util.Optional;
 
 import org.springframework.stereotype.Controller;
-
-import cl.kibernum.m6actividad2.apirestproductos.entity.User;
-import cl.kibernum.m6actividad2.apirestproductos.service.IUserService;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import ch.qos.logback.core.model.Model;
-
+import cl.kibernum.m6actividad2.apirestproductos.entity.User;
+import cl.kibernum.m6actividad2.apirestproductos.service.IUserService;
 
 @Controller
 public class UserController {
@@ -24,7 +20,7 @@ public class UserController {
         this.service = service;
     }
     
-    @GetMapping({"/users", "/"})
+    @GetMapping({"/users"})
     public String listarUsuarios(Model model) {
         model.addAttribute("users", service.listAllUsers());
         return "users";
@@ -41,7 +37,7 @@ public class UserController {
   public String showFormEditUser(@PathVariable Long id, Model model) {
     Optional<User> optionalUser = service.getUserById(id);
     if (!optionalUser.isPresent()) {
-      throw new StudentNotFoundException("No se encontró un usuario con id: " + id);
+      throw new UserNotFoundException("No se encontró un usuario con id: " + id);
     }
     User userExists = optionalUser.get();
     model.addAttribute("user", userExists);
@@ -53,7 +49,7 @@ public class UserController {
     Optional<User> optionalUser = service.getUserById(id);
     System.out.println(optionalUser.isPresent());
     if (!optionalUser.isPresent()) {
-      throw new StudentNotFoundException("No se encontró un usuario con id: " + id);
+      throw new UserNotFoundException("No se encontró un usuario con id: " + id);
     }
     User userExists = optionalUser.get();
     

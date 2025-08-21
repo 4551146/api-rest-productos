@@ -1,5 +1,43 @@
 package cl.kibernum.m6actividad2.apirestproductos.service;
 
-public class IproductServiceImpl {
+import org.springframework.stereotype.Service;
+
+import cl.kibernum.m6actividad2.apirestproductos.repository.IProductRepository;
+import cl.kibernum.m6actividad2.apirestproductos.entity.Product;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class IProductServiceImpl implements IProductService{
+    private final IProductRepository repository;
+  
+    public IProductServiceImpl(IProductRepository repository) {
+        this.repository = repository;
+    }
     
+    @Override
+    public List<Product> listAllProducts() {
+        return (List<Product>) repository.findAll();
+    }
+
+    @Override
+    public Product saveProduct(Product product) {
+        return repository.save(product);
+    }
+
+    @Override
+    public Optional<Product> getProductById(Long id) {
+        return repository.findById(id);
+    }
+
+    @Override
+    public Product updatedProduct(Product product) {
+        return repository.save(product);
+    }
+
+    @Override
+    public void deleteProductById(Long id) {
+        repository.deleteById(id);
+    }
 }
