@@ -1,84 +1,78 @@
 package cl.kibernum.m6actividad2.apirestproductos.controller;
 
+import java.util.List;
 import java.util.Optional;
 
-import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import cl.kibernum.m6actividad2.apirestproductos.entity.Product;
 import cl.kibernum.m6actividad2.apirestproductos.service.IProductService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 
-
-import org.springframework.ui.Model;
-
-@Controller
+@RestController
+@RequestMapping("api/products")
 public class ProductController {
 
-    private final IProductService service;
+  private final IProductService service;
 
-    public ProductController(IProductService service){
-        this.service = service;
-    }
-    
-    @GetMapping({"/products"})
-    public String listarProductos(Model model) {
-        model.addAttribute("products", service.listAllProducts());
-        return "products";
-    }
-
-    @GetMapping("/products/new")
-    public String createProductForm(Model model) {
-        Product product = new Product();
-        model.addAttribute("product", product);
-        return "create-product";
+  public ProductController(IProductService service) {
+    this.service = service;
   }
 
-  @GetMapping("/products/edit/{id}")
-  public String Product(@PathVariable Long id, Model model) {
+  // Listar productos
+  @GetMapping
+  public List<Product> listarProductos() {
+    return service.listAllProducts();
+  }
+
+  // Crear nuevo producto
+  @PostMapping
+  public ResponseEntity<Product> saveProduct(@RequestBody Product product) {
+    if (product.getId() == null && !product.isActive()) {
+      product.setActive(true); // Por defecto, activo
+    }
+    Product saved = service.saveProduct(product);
+    return new ResponseEntity<>(saved, HttpStatus.CREATED);
+  }
+
+  // Ver detalles de un producto
+  @GetMapping("/{id}")
+  public ResponseEntity<Product> viewProduct(@PathVariable Long id) {
+    Optional<Product> optionalProduct = service.getProductById(id);
+    if (!optionalProduct.isPresent()) {
+      throw new ProductNotFoundException("No se encontró un producto con id: " + id);
+    }
+    return ResponseEntity.ok(optionalProduct.get());
+  }
+
+  // Actualizar producto existente (PUT)
+  @PutMapping("/{id}")
+  public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product) {
     Optional<Product> optionalProduct = service.getProductById(id);
     if (!optionalProduct.isPresent()) {
       throw new ProductNotFoundException("No se encontró un producto con id: " + id);
     }
     Product productExists = optionalProduct.get();
-    model.addAttribute("product", productExists);
-    return "edit_product";
-  }
-
-  @PostMapping("/productos/{id}")
-  public String updatedProduct(@PathVariable Long id, @ModelAttribute("product") Product product, Model model ) {
-    Optional<Product> optionalProduct = service.getProductById(id);
-    System.out.println(optionalProduct.isPresent());
-    if (!optionalProduct.isPresent()) {
-      throw new ProductNotFoundException("No se encontró un producto con id: " + id);
-    }
-    Product productExists = optionalProduct.get();
-    
-    productExists.setId(id);
     productExists.setName(product.getName());
     productExists.setDescription(product.getDescription());
     productExists.setStock(product.getStock());
     productExists.setPrice(product.getPrice());
-    //productExists.setActive(product.getActive());
-
-    service.updatedProduct(productExists);
-    return "redirect:/products";
+    Product updated = service.updatedProduct(productExists);
+    return ResponseEntity.ok(updated);
   }
 
-  @GetMapping("/products-delete/{id}")
-  public String eliminarProducto(@PathVariable Long id) {
+  // Eliminar producto (DELETE)
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
     service.deleteProductById(id);
-    return "redirect:/products";
+    return ResponseEntity.noContent().build();
   }
-
-
 }
 
+@ResponseStatus(HttpStatus.NOT_FOUND)
 class ProductNotFoundException extends RuntimeException {
   public ProductNotFoundException(String message) {
     super(message);
   }
-    
 }

@@ -1,0 +1,56 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:librarydb
+    driverClassName: org.h2.Driver
+    username: sa
+    password: 
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
+  h2:
+    console:
+      enabled: true
+  application:
+    name: apirest
+  security:
+    user:
+      name: userdevops
+      password: devops
+
+server:
+  port: 8080
+
+security:
+  auth:
+    registration-enabled: true
+  jwt:
+    # Secret definido directo en el YAML para desarrollo
+    secret: "una_clave_segura_de_al_menos_32_caracteres"
+    issuer: apirest
+    access-ttl: 15m
+    refresh-ttl: 7d
+    refresh-enabled: true
+    denylist-enabled: false
+  cors:
+    allowed-origins: []
+    allowed-origin-patterns:
+      - "*"
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.hibernate.tool.schema: DEBUG
+    org.hibernate.orm.schema: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "mappings"

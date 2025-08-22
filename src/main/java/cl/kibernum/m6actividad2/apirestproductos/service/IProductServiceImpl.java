@@ -9,16 +9,16 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class IProductServiceImpl implements IProductService{
+public class IProductServiceImpl implements IProductService {
     private final IProductRepository repository;
-  
+
     public IProductServiceImpl(IProductRepository repository) {
         this.repository = repository;
     }
-    
+
     @Override
     public List<Product> listAllProducts() {
-        return (List<Product>) repository.findAll();
+        return repository.findAllByActiveTrue();
     }
 
     @Override
@@ -38,6 +38,10 @@ public class IProductServiceImpl implements IProductService{
 
     @Override
     public void deleteProductById(Long id) {
-        repository.deleteById(id);
+        Optional<Product> productOpt = repository.findById(id);
+        productOpt.ifPresent(product -> {
+            product.setActive(false);
+            repository.save(product);
+        });
     }
 }

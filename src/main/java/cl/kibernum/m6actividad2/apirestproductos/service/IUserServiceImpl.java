@@ -40,4 +40,9 @@ public class IUserServiceImpl implements IUserService{
     public void deleteUserById(Long id) {
         repository.deleteById(id);
     }
+
+    @Override
+    public User findByEmailAndActiveTrue(String email) {
+        return repository.findByEmailAndActiveTrue(email);
+    }
 }

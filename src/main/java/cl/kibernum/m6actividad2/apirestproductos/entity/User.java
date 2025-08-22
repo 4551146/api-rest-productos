@@ -5,11 +5,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users")
-
+@Inheritance(strategy = InheritanceType.JOINED) // Herencia JPA
 public class User  {
 
   @Id
@@ -23,19 +25,24 @@ public class User  {
   private String rut;
   @Column(name="email", nullable = false, length = 50, unique = true)
   private String email;
-  @Column(name="password", nullable = false, length = 50)
+  @Column(name="password", nullable = false, length = 60) // BCrypt puede ser más largo
   private String password;
-
+  @Column(name = "active", nullable = false)
+  private boolean active;
+  @Column(name="username", nullable = false, length = 50, unique = true)
+  private String username;
   public User(){
     
   }
 
-  public User(String name, String lastname, String rut, String email, String password) {
+  public User(String username, String name, String lastname, String rut, String email, String password) {
+    this.username = username;
     this.name = name;
     this.lastname = lastname;
     this.rut = rut;
     this.email = email;
     this.password = password; 
+    this.active = true;
   }
 
   public Long getId() {
@@ -85,6 +92,21 @@ public class User  {
  public void setPassword(String password) {
     this.password = password;
  }
+  public boolean isActive() {
+    return active;
+  }
+
+  public void setActive(boolean active) {
+    this.active = active;
+  }
+
+  public String getUsername() {
+    return username;
+  }
+
+  public void setUsername(String username) {
+    this.username = username;
+  }
 
   @Override
   public String toString() {
@@ -95,6 +117,8 @@ public class User  {
             ", rut='" + rut + '\'' +
             ", email='" + email + '\'' +
             ", password='" + password + '\'' +
+            ", active='" + active + '\'' +
+            ", username='" + username + '\'' +
             '}';
   }
 }
