@@ -95,10 +95,10 @@ public class SecurityConfig {
                 // Endpoints públicos (login/registro/refresh y consola H2).
                 .requestMatchers("/api/auth/**", "/h2-console/**", "/actuator/**","/test/**").permitAll()
                 // Endpoints API REST protegidos
-                .requestMatchers(HttpMethod.GET, "/api/products/**").hasAnyRole("USER")
-                .requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("USER")
-                .requestMatchers(HttpMethod.PUT, "/api/products/**").hasRole("USER")
-                .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("USER")
+                .requestMatchers(HttpMethod.GET, "/api/producto/**").hasAnyRole("USER")
+                .requestMatchers(HttpMethod.POST, "/api/producto/**").hasRole("USER")
+                .requestMatchers(HttpMethod.PUT, "/api/producto/**").hasRole("USER")
+                .requestMatchers(HttpMethod.DELETE, "/api/producto/**").hasRole("USER")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

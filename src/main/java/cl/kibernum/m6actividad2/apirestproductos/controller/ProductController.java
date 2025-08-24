@@ -11,7 +11,7 @@ import cl.kibernum.m6actividad2.apirestproductos.entity.Product;
 import cl.kibernum.m6actividad2.apirestproductos.service.IProductService;
 
 @RestController
-@RequestMapping("api/products")
+@RequestMapping("api/producto")
 public class ProductController {
 
   private final IProductService service;
