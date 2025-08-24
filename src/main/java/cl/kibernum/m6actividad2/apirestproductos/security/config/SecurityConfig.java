@@ -93,7 +93,7 @@ public class SecurityConfig {
             .headers(headers -> headers.frameOptions(frame -> frame.disable())) // for H2 console
             .authorizeHttpRequests(auth -> auth
                 // Endpoints públicos (login/registro/refresh y consola H2).
-                .requestMatchers("/api/auth/**", "/h2-console/**", "/actuator/**","/test/**").permitAll()
+                .requestMatchers("/api/auth/**", "/h2-console/**").permitAll()
                 // Endpoints API REST protegidos
                 .requestMatchers(HttpMethod.GET, "/api/producto/**").hasAnyRole("USER")
                 .requestMatchers(HttpMethod.POST, "/api/producto/**").hasRole("USER")
