@@ -2,7 +2,7 @@ package cl.kibernum.m6actividad2.apirestproductos.security.jwt;
 
 // Entidades de dominio para roles y usuarios.
 import cl.kibernum.m6actividad2.apirestproductos.security.domain.Role;
-import cl.kibernum.m6actividad2.apirestproductos.security.domain.UserAccount;
+import cl.kibernum.m6actividad2.apirestproductos.security.domain.User;
 // Librerías Nimbus JOSE + JWT para firmar y validar tokens.
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -65,7 +65,7 @@ public class JwtService {
      * @param user usuario autenticado
      * @return JWT firmado listo para usar como Bearer token
      */
-    public String generateAccessToken(UserAccount user) {
+    public String generateAccessToken(User user) {
         return generateToken(user, props.getJwt().getAccessTtl().toSeconds());
     }
 
@@ -75,7 +75,7 @@ public class JwtService {
      * @return JWT firmado de refresco
      * @throws ResponseStatusException si los refresh tokens están deshabilitados
      */
-    public String generateRefreshToken(UserAccount user) {
+    public String generateRefreshToken(User user) {
         if (!props.getJwt().isRefreshEnabled()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Refresh tokens are disabled");
         }
@@ -88,7 +88,7 @@ public class JwtService {
      * @param ttlSeconds tiempo de vida en segundos
      * @return JWT firmado
      */
-    private String generateToken(UserAccount user, long ttlSeconds) {
+    private String generateToken(User user, long ttlSeconds) {
         try {
             Instant now = clock.instant();
             List<String> roles = mapRoles(user.getRoles());

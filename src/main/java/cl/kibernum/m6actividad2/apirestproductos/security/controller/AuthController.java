@@ -3,7 +3,7 @@ package cl.kibernum.m6actividad2.apirestproductos.security.controller;
 // Roles de la aplicación (ROLE_USER, ROLE_ADMIN).
 import cl.kibernum.m6actividad2.apirestproductos.security.domain.Role;
 // Entidad JPA que representa a los usuarios de la aplicación.
-import cl.kibernum.m6actividad2.apirestproductos.security.domain.UserAccount;
+import cl.kibernum.m6actividad2.apirestproductos.security.domain.User;
 // Respuesta de autenticación con tokens y expiración.
 import cl.kibernum.m6actividad2.apirestproductos.security.dto.AuthResponse;
 // DTO para login (username/password) con validación.
@@ -15,7 +15,7 @@ import cl.kibernum.m6actividad2.apirestproductos.security.jwt.JwtProperties;
 // Servicio para emitir y validar tokens JWT.
 import cl.kibernum.m6actividad2.apirestproductos.security.jwt.JwtService;
 // Repositorio para persistencia de usuarios.
-import cl.kibernum.m6actividad2.apirestproductos.security.repository.UserAccountRepository;
+import cl.kibernum.m6actividad2.apirestproductos.security.repository.IUserRepository;
 import jakarta.validation.Valid;
 import java.util.Set;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +23,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -56,7 +55,7 @@ public class AuthController {
     // Servicio JWT para generar y validar tokens.
     private final JwtService jwtService;
     // Repositorio de usuarios para consultas y persistencia.
-    private final UserAccountRepository userRepo;
+    private final IUserRepository userRepo;
     // Codificador de contraseñas (BCrypt).
     private final PasswordEncoder passwordEncoder;
     // Propiedades de seguridad, incluyendo toggles de registro/refresh.
@@ -64,7 +63,7 @@ public class AuthController {
 
     // Inyección por constructor de todos los colaboradores.
     public AuthController(AuthenticationManager authManager, JwtService jwtService,
-            UserAccountRepository userRepo, PasswordEncoder passwordEncoder,
+            IUserRepository userRepo, PasswordEncoder passwordEncoder,
             JwtProperties props) {
         this.authManager = authManager;
         this.jwtService = jwtService;
@@ -88,7 +87,7 @@ public class AuthController {
             authManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
             // Cargamos el usuario para construir los claims/roles del token.
-            UserAccount user = userRepo.findByUsername(request.getUsername()).orElseThrow();
+            User user = userRepo.findByUsername(request.getUsername()).orElseThrow();
             // Generamos access token (siempre) y refresh token (si está habilitado).
             String access = jwtService.generateAccessToken(user);
             String refresh = props.getJwt().isRefreshEnabled() ? jwtService.generateRefreshToken(user) : null;
@@ -122,17 +121,17 @@ public class AuthController {
                 throw new IllegalArgumentException("Username already exists");
             }
             // Construcción y persistencia de un nuevo usuario con todos los campos
-            UserAccount ua = new UserAccount();
-            ua.setUsername(request.getUsername());
-            ua.setPassword(passwordEncoder.encode(request.getPassword()));
-            ua.setName(request.getName());
-            ua.setLastname(request.getLastname());
-            ua.setRut(request.getRut());
-            ua.setEmail(request.getEmail());
-            ua.setActive(true);
-            ua.setEnabled(true);
-            ua.setRoles(Set.of(Role.ROLE_USER));
-            userRepo.save(ua);
+            User u = new User();
+            u.setUsername(request.getUsername());
+            u.setPassword(passwordEncoder.encode(request.getPassword()));
+            u.setName(request.getName());
+            u.setLastname(request.getLastname());
+            u.setRut(request.getRut());
+            u.setEmail(request.getEmail());
+            u.setActive(true);
+            u.setEnabled(true);
+            u.setRoles(Set.of(Role.ROLE_USER));
+            userRepo.save(u);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             System.out.println("Error al registrar usuario: " + e.getMessage());

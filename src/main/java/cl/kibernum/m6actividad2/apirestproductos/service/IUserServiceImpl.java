@@ -2,8 +2,9 @@ package cl.kibernum.m6actividad2.apirestproductos.service;
 
 import org.springframework.stereotype.Service;
 
-import cl.kibernum.m6actividad2.apirestproductos.repository.IUserRepository;
-import cl.kibernum.m6actividad2.apirestproductos.entity.User;
+
+import cl.kibernum.m6actividad2.apirestproductos.security.domain.User;
+import  cl.kibernum.m6actividad2.apirestproductos.security.repository.IUserRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,7 +43,7 @@ public class IUserServiceImpl implements IUserService{
     }
 
     @Override
-    public User findByEmailAndActiveTrue(String email) {
+    public Optional<User> findByEmailAndActiveTrue(String email) {
         return repository.findByEmailAndActiveTrue(email);
     }
 }

@@ -28,8 +28,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import cl.kibernum.m6actividad2.apirestproductos.security.repository.UserAccountRepository;
+import cl.kibernum.m6actividad2.apirestproductos.security.repository.IUserRepository;
 
 /**
  * Configuración principal de Spring Security.
@@ -111,7 +110,7 @@ public class SecurityConfig {
      * Usa authorities con valores del enum (ROLE_*) para evitar doble prefijo.
      */
     @Bean
-    public UserDetailsService userDetailsService(UserAccountRepository repo) {
+    public UserDetailsService userDetailsService(IUserRepository repo) {
         return username -> repo.findByUsername(username)
             .map(ua -> User.withUsername(ua.getUsername())
                 .password(ua.getPassword())
