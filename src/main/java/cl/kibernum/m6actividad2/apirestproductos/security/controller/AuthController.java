@@ -17,7 +17,9 @@ import cl.kibernum.m6actividad2.apirestproductos.security.jwt.JwtService;
 // Repositorio para persistencia de usuarios.
 import cl.kibernum.m6actividad2.apirestproductos.security.repository.IUserRepository;
 import jakarta.validation.Valid;
+import java.util.Map;
 import java.util.Set;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -82,23 +84,19 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         try {
-            // Delegamos la verificación de credenciales al AuthenticationManager
-            // (PasswordEncoder incluido).
             authManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-            // Cargamos el usuario para construir los claims/roles del token.
             User user = userRepo.findByUsername(request.getUsername()).orElseThrow();
-            // Generamos access token (siempre) y refresh token (si está habilitado).
             String access = jwtService.generateAccessToken(user);
             String refresh = props.getJwt().isRefreshEnabled() ? jwtService.generateRefreshToken(user) : null;
             long expiresIn = props.getJwt().getAccessTtl().toSeconds();
-            return ResponseEntity.ok(new AuthResponse(access, expiresIn, refresh));
+            return ResponseEntity.ok(new AuthResponse(access, expiresIn, refresh)); // 200 OK
         } catch (BadCredentialsException ex) {
             System.out.println("Credenciales inválidas para usuario: " + request.getUsername());
-            throw ex; // Spring maneja esto y devuelve 401 automáticamente.
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 401 Unauthorized
         } catch (Exception e) {
             System.out.println("Error al autenticar usuario: " + request.getUsername() + " - " + e.getMessage());
-            throw new RuntimeException("Error al autenticar usuario", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // 400 Bad Request
         }
     }
 
@@ -110,17 +108,19 @@ public class AuthController {
      * global).
      */
     @PostMapping("/register")
-    public ResponseEntity<Void> register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterRequest request) {
         try {
             if (!props.getAuth().isRegistrationEnabled()) {
                 System.out.println("Registro de usuarios deshabilitado");
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 404 Not Found
             }
             if (userRepo.existsByUsername(request.getUsername())) {
                 System.out.println("El username ya existe: " + request.getUsername());
-                throw new IllegalArgumentException("Username already exists");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    Map.of("message", "El nombre de usuario ya existe")
+                ); // 400 Bad Request
             }
-            // Construcción y persistencia de un nuevo usuario con todos los campos
+            // Solo se llega aquí si el username NO existe
             User u = new User();
             u.setUsername(request.getUsername());
             u.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -132,20 +132,12 @@ public class AuthController {
             u.setEnabled(true);
             u.setRoles(Set.of(Role.ROLE_USER));
             userRepo.save(u);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok(Map.of("message", "Usuario registrado exitosamente")); // 200 OK con mensaje
         } catch (Exception e) {
             System.out.println("Error al registrar usuario: " + e.getMessage());
-            throw new RuntimeException("Error al registrar usuario", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                Map.of("message", "Error al registrar usuario")
+            ); // 400 Bad Request
         }
     }
-
-    /**
-     * Emite nuevos tokens a partir de un refresh token válido.
-     * Importante: este endpoint espera el refresh token en el cuerpo como texto
-     * plano (no JSON).
-     * Si refresh está deshabilitado via propiedades, responde 404 Not Found.
-     * Valida la versión del token (tokenVersion) para soportar invalidación global
-     * por usuario.
-     */
-
 }
